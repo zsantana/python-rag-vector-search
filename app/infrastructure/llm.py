@@ -16,8 +16,8 @@ def get_available_gpt_models():
             if model.id.startswith('gpt')
         ])
         if not gpt_models:
-            gpt_models = ["gpt-4", "gpt-3.5-turbo"]  # fallback
+            gpt_models = ["gpt-5-mini", "gpt-4", "gpt-3.5-turbo"]  # fallback
         return gpt_models
     except Exception as e:
         print(f"Error fetching models: {e}")
-        return ["gpt-4", "gpt-3.5-turbo"]  # fallback
+        return ["gpt-5-mini", "gpt-4", "gpt-3.5-turbo"]  # fallback

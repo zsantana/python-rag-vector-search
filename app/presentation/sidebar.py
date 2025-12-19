@@ -1,3 +1,5 @@
+import os
+
 import streamlit as st
 from app.infrastructure.llm import get_available_gpt_models
 
@@ -14,9 +16,12 @@ def sidebar():
 
         # 1.2 Seleção de Modelo LLM
         gpt_models = get_available_gpt_models()
+        default_llm_model = os.getenv("OPENAI_DEFAULT_MODEL", "gpt-5-mini")
+        default_llm_index = gpt_models.index(default_llm_model) if default_llm_model in gpt_models else 0
         llm_model = st.selectbox(
             "Modelo LLM",
-            gpt_models
+            gpt_models,
+            index=default_llm_index,
         )
 
         # 1.3 Seleção de Modelo de Embeddings
@@ -33,9 +38,9 @@ def sidebar():
 
         # 1.5 Parâmetros de Vetorização
         st.subheader("Parâmetros de Vetorização")
-        chunk_size = st.number_input("Chunk Size", value=9999)
-        overlap = st.number_input("Overlap", value=9999)
-        top_k = st.number_input("Top K", value=999)
+        chunk_size = st.number_input("Chunk Size", value=1000)
+        overlap = st.number_input("Overlap", value=200)
+        top_k = st.number_input("Top K", value=10)
 
         # 1.6 Parâmetros Específicos da Busca Híbrida
         if search_type == "Híbrida":

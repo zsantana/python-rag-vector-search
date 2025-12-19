@@ -1,6 +1,6 @@
 import streamlit as st
 from app.presentation.sidebar import sidebar
-from app.presentation.chat import chat_interface, display_token_metrics
+from app.presentation.chat import chat_interface, format_token_footer
 from app.presentation.progress import progress_bar
 from app.application.vectorization import process_uploaded_files
 from app.application.search import get_search_strategy, search
@@ -48,6 +48,7 @@ def main():
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
             full_response = ""
+            input_tokens = output_tokens = total_tokens = None
             
             # Search for relevant documents
             search_strategy = get_search_strategy(
@@ -72,21 +73,32 @@ def main():
                 messages=(
                     [{"role": "system", "content": system_prompt}]
                     + [
-                        {"role": m["role"], "content": m["content"]}
+                        {"role": m["role"], "content": m.get("content", "")}
                         for m in st.session_state.messages
                     ]
                 ),
                 stream=True,
+                stream_options={"include_usage": True},
             )
             for chunk in stream:
-                full_response += (chunk.choices[0].delta.content or "")
-                message_placeholder.markdown(full_response + "▌")
-            message_placeholder.markdown(full_response)
-            
-            # Dummy token metrics
-            display_token_metrics(100, 200, 300)
+                choices = getattr(chunk, "choices", None) or []
+                if choices:
+                    delta = getattr(choices[0], "delta", None)
+                    content = getattr(delta, "content", None) if delta is not None else None
+                    if content:
+                        full_response += content
+                        message_placeholder.markdown(full_response + "▌")
 
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
+                usage = getattr(chunk, "usage", None)
+                if usage is not None:
+                    input_tokens = getattr(usage, "prompt_tokens", None)
+                    output_tokens = getattr(usage, "completion_tokens", None)
+                    total_tokens = getattr(usage, "total_tokens", None)
+
+            footer = format_token_footer(input_tokens, output_tokens, total_tokens)
+            message_placeholder.markdown(f"{full_response}{footer}")
+
+        st.session_state.messages.append({"role": "assistant", "content": full_response, "footer": footer})
 
 if __name__ == "__main__":
     main()
