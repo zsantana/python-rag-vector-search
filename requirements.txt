@@ -1,0 +1,13 @@
+streamlit
+psycopg2-binary
+pgvector
+python-dotenv
+openai
+langchain
+langchain-openai
+langchain-text-splitters
+tiktoken
+pypdf
+python-docx
+markdown
+langchain-community
