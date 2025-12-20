@@ -2,10 +2,22 @@ import os
 
 import streamlit as st
 from app.infrastructure.llm import get_available_gpt_models
+from app.infrastructure.database import truncate_documents_table
 
 def sidebar():
     with st.sidebar:
         st.title("Configurações")
+
+        if st.button("Resetar conversa"):
+            st.session_state.pop("messages", None)
+            st.rerun()
+
+        if st.button("Truncate vetorização (limpar tabela)"):
+            try:
+                truncate_documents_table()
+                st.success("Tabela de vetorização limpa com sucesso.")
+            except Exception as e:
+                st.error(f"Falha ao limpar tabela: {e}")
 
         # 1.1 Upload de Arquivos
         uploaded_files = st.file_uploader(

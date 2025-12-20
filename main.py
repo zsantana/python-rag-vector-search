@@ -30,14 +30,34 @@ def main():
     
     if sidebar_configs["uploaded_files"]:
         if st.sidebar.button("Iniciar Vetorização"):
-            progress, progress_text = progress_bar()
+            progress, progress_text = progress_bar(in_sidebar=True, show_header=False, show_text=False)
+            with st.chat_message("assistant"):
+                log_placeholder = st.empty()
+                log_lines: list[str] = [
+                    "### Vetorização (chunk + embeddings)",
+                    f"Modelo de embedding: `{sidebar_configs['embedding_model']}`",
+                    "---",
+                ]
+
+                def log_fn(line: str) -> None:
+                    log_lines.append(line)
+                    log_placeholder.markdown("\n".join(log_lines))
+
             process_uploaded_files(
                 sidebar_configs["uploaded_files"],
                 sidebar_configs["chunk_size"],
                 sidebar_configs["overlap"],
                 sidebar_configs["embedding_model"],
                 progress,
-                progress_text
+                progress_text,
+                log_fn=log_fn,
+            )
+
+            st.session_state.messages.append(
+                {
+                    "role": "assistant",
+                    "content": "\n".join(log_lines),
+                }
             )
 
     if prompt := st.chat_input("Digite sua pergunta"):

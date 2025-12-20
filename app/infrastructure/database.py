@@ -51,6 +51,15 @@ def insert_document(content, embedding):
     cursor.close()
     conn.close()
 
+
+def truncate_documents_table() -> None:
+    conn = get_db_connection(register=False)
+    cursor = conn.cursor()
+    cursor.execute("TRUNCATE TABLE documents RESTART IDENTITY;")
+    conn.commit()
+    cursor.close()
+    conn.close()
+
 def search_l2(query_embedding, limit=5):
     conn = get_db_connection()
     cursor = conn.cursor()
